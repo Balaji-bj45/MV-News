@@ -42,6 +42,7 @@ void i18n.use(initReactI18next).init({
           india: 'India',
           tamilnadu: 'Tamil Nadu',
           candidate: 'Candidate',
+          mvnews: 'MV News',
         },
         home: {
           heroLabel: 'Featured story',
@@ -62,6 +63,7 @@ void i18n.use(initReactI18next).init({
           news: 'News',
           candidates: 'Candidates',
           video: 'Videos',
+          mvnews: 'MV News',
           email: 'Email address',
           password: 'Password',
           signIn: 'Sign in',
@@ -106,6 +108,7 @@ void i18n.use(initReactI18next).init({
           india: 'இந்தியா',
           tamilnadu: 'தமிழ்நாடு',
           candidate: 'வேட்பாளர்',
+          mvnews: 'எம்.வி நியூஸ்',
         },
         home: {
           heroLabel: 'முக்கிய செய்தி',
@@ -126,6 +129,7 @@ void i18n.use(initReactI18next).init({
           news: 'செய்திகள்',
           candidates: 'வேட்பாளர்கள்',
           video: 'வீடியோக்கள்',
+          mvnews: 'எம்.வி நியூஸ்',
           email: 'மின்னஞ்சல் முகவரி',
           password: 'கடவுச்சொல்',
           signIn: 'உள்நுழை',

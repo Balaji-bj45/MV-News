@@ -50,7 +50,7 @@ import type {
   VideoInput,
 } from '../types';
 
-type DashboardSection = 'news' | 'candidates' | 'videos';
+type DashboardSection = 'news' | 'candidates' | 'videos' | 'mvnews';
 
 interface NewsEditorState extends Omit<NewsInput, 'tags'> {
   tagsText: string;
@@ -80,6 +80,16 @@ const createNewsEditorState = (): NewsEditorState => {
   const form = createEmptyNewsForm();
   return {
     ...form,
+    publishedAt: toLocalDateTimeValue(form.publishedAt),
+    tagsText: '',
+  };
+};
+
+const createMvNewsEditorState = (): NewsEditorState => {
+  const form = createEmptyNewsForm();
+  return {
+    ...form,
+    category: 'mvnews',
     publishedAt: toLocalDateTimeValue(form.publishedAt),
     tagsText: '',
   };
@@ -197,9 +207,10 @@ export default function AdminDashboard() {
 
   const sectionParam = searchParams.get('section');
   const activeSection: DashboardSection =
-    sectionParam === 'candidates' || sectionParam === 'videos' ? sectionParam : 'news';
+    sectionParam === 'candidates' || sectionParam === 'videos' || sectionParam === 'mvnews' ? sectionParam : 'news';
 
   const [newsPage, setNewsPage] = useState(1);
+  const [mvNewsPage, setMvNewsPage] = useState(1);
   const [newsCategory, setNewsCategory] = useState<'all' | NewsCategory>('all');
   const [videoPage, setVideoPage] = useState(1);
 
@@ -207,6 +218,11 @@ export default function AdminDashboard() {
     page: newsPage, 
     limit: 10, 
     category: newsCategory !== 'all' ? newsCategory : undefined 
+  });
+  const mvNewsResponse = useGetNewsQuery({
+    page: mvNewsPage,
+    limit: 10,
+    category: 'mvnews',
   });
   const candidateResponse = useGetCandidatesQuery();
   const videosResponse = useGetVideosQuery({ page: videoPage, limit: 10 });
@@ -225,10 +241,12 @@ export default function AdminDashboard() {
   const [deleteVideo] = useDeleteVideoMutation();
 
   const [editingNews, setEditingNews] = useState<News | null>(null);
+  const [editingMvNews, setEditingMvNews] = useState<News | null>(null);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const [editingVideo, setEditingVideo] = useState<VideoType | null>(null);
 
   const [newsForm, setNewsForm] = useState<NewsEditorState>(createNewsEditorState);
+  const [mvNewsForm, setMvNewsForm] = useState<NewsEditorState>(createMvNewsEditorState);
   const [candidateForm, setCandidateForm] = useState<CandidateInput>(createEmptyCandidateForm);
   const [videoForm, setVideoForm] = useState<VideoEditorState>(createVideoEditorState);
 
@@ -239,6 +257,11 @@ export default function AdminDashboard() {
   const resetNewsEditor = () => {
     setEditingNews(null);
     setNewsForm(createNewsEditorState());
+  };
+
+  const resetMvNewsEditor = () => {
+    setEditingMvNews(null);
+    setMvNewsForm(createMvNewsEditorState());
   };
 
   const resetCandidateEditor = () => {
@@ -290,6 +313,49 @@ export default function AdminDashboard() {
       resetNewsEditor();
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Unable to save this story'));
+    }
+  };
+
+  const handleMvNewsUploadImage = async (file?: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const result = await uploadImage(file);
+      setMvNewsForm((current) => ({ ...current, imageUrl: result.imageUrl }));
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Image upload failed'));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleMvNewsSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const payload: NewsInput = {
+      ...mvNewsForm,
+      category: 'mvnews',
+      tags: parseTags(mvNewsForm.tagsText),
+      publishedAt: fromLocalDateTimeValue(mvNewsForm.publishedAt),
+    };
+
+    try {
+      if (editingMvNews) {
+        await updateNews({ id: editingMvNews._id, payload }).unwrap();
+        toast.success('MV News updated');
+      } else {
+        await createNews(payload).unwrap();
+        toast.success('MV News created');
+      }
+
+      resetMvNewsEditor();
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Unable to save MV news'));
     }
   };
 
@@ -362,6 +428,17 @@ export default function AdminDashboard() {
     });
   };
 
+  const startEditMvNews = (item: News) => {
+    setEditingMvNews(item);
+    const form = toNewsForm(item);
+    setMvNewsForm({
+      ...form,
+      category: 'mvnews',
+      publishedAt: toLocalDateTimeValue(form.publishedAt),
+      tagsText: stringifyTags(form.tags),
+    });
+  };
+
   const startEditCandidate = (item: Candidate) => {
     setEditingCandidate(item);
     setCandidateForm(toCandidateForm(item));
@@ -390,6 +467,22 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Unable to delete story'));
+    }
+  };
+
+  const handleDeleteMvNews = async (id: string) => {
+    if (!window.confirm('Delete this MV News?')) {
+      return;
+    }
+
+    try {
+      await deleteNews(id).unwrap();
+      toast.success('MV News deleted');
+      if (editingMvNews?._id === id) {
+        resetMvNewsEditor();
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Unable to delete MV News'));
     }
   };
 
@@ -462,10 +555,16 @@ export default function AdminDashboard() {
                 active={activeSection === 'videos'}
                 onClick={() => setSection('videos')}
               />
+              <SidebarButton
+                label={t('admin.mvnews')}
+                icon={<Newspaper className="h-5 w-5 text-red-600" />}
+                active={activeSection === 'mvnews'}
+                onClick={() => setSection('mvnews')}
+              />
             </aside>
 
             <div className="space-y-6">
-              <DashboardPanel title="Add or edit news" subtitle={t('admin.imageHint')}>
+              <DashboardPanel title={activeSection === 'mvnews' ? 'Add or edit MV News' : activeSection === 'candidates' ? 'Add or edit candidate' : activeSection === 'videos' ? 'Add or edit video' : 'Add or edit news'} subtitle={t('admin.imageHint')}>
                 {activeSection === 'news' ? (
                   <form className="grid gap-5" onSubmit={handleNewsSubmit}>
                     <div className="grid gap-5 md:grid-cols-2">
@@ -849,7 +948,7 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </form>
-                ) : (
+                ) : activeSection === 'videos' ? (
                   <form className="grid gap-5" onSubmit={handleVideoSubmit}>
                     <div className="grid gap-5 md:grid-cols-2">
                       <label className="space-y-2">
@@ -925,10 +1024,141 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </form>
-                )}
+                ) : activeSection === 'mvnews' ? (
+                  <form className="grid gap-5" onSubmit={handleMvNewsSubmit}>
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Title</span>
+                        <input
+                          value={mvNewsForm.title}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, title: event.target.value }))}
+                          required
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Category</span>
+                        <input
+                          value="MV News"
+                          disabled
+                          className="w-full rounded-2xl border border-stone-300 bg-stone-100 px-4 py-3 text-sm text-stone-500 cursor-not-allowed"
+                        />
+                      </label>
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Source</span>
+                        <input
+                          value={mvNewsForm.source}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, source: event.target.value }))}
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Published at</span>
+                        <input
+                          type="datetime-local"
+                          value={mvNewsForm.publishedAt}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, publishedAt: event.target.value }))}
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                    </div>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-700">Description</span>
+                      <textarea
+                        value={mvNewsForm.description}
+                        onChange={(event) => setMvNewsForm((current) => ({ ...current, description: event.target.value }))}
+                        rows={3}
+                        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                      />
+                    </label>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-700">Content (Simple input instead of Rich Text)</span>
+                      <textarea
+                        value={mvNewsForm.content}
+                        onChange={(event) => setMvNewsForm((current) => ({ ...current, content: event.target.value }))}
+                        rows={8}
+                        placeholder="Enter plain text or HTML content formatted responsive for frontend..."
+                        className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm font-mono"
+                      />
+                    </label>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Image URL</span>
+                        <input
+                          value={mvNewsForm.imageUrl}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, imageUrl: event.target.value }))}
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Source URL</span>
+                        <input
+                          value={mvNewsForm.sourceUrl}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, sourceUrl: event.target.value }))}
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Tags</span>
+                        <input
+                          value={mvNewsForm.tagsText}
+                          onChange={(event) => setMvNewsForm((current) => ({ ...current, tagsText: event.target.value }))}
+                          placeholder="mvnews, exclusive, coverage"
+                          className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
+                        />
+                      </label>
+                      <div className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-700">Upload image</span>
+                        <label className="flex cursor-pointer items-center justify-center gap-3 rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-3 text-sm font-semibold text-stone-700 hover:border-red-300 hover:text-red-700">
+                          <ImagePlus className="h-4 w-4" />
+                          {uploadingImage ? 'Uploading...' : t('common.upload')}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => void handleMvNewsUploadImage(event.target.files?.[0])}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-3 text-sm font-semibold text-stone-700">
+                      <input
+                        type="checkbox"
+                        checked={mvNewsForm.isFeatured}
+                        onChange={(event) => setMvNewsForm((current) => ({ ...current, isFeatured: event.target.checked }))}
+                        className="h-4 w-4 rounded border-stone-300"
+                      />
+                      Mark as featured
+                    </label>
+
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="submit"
+                        disabled={createNewsStatus.isLoading || updateNewsStatus.isLoading}
+                        className="rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                      >
+                        {editingMvNews ? t('common.update') : t('common.save')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetMvNewsEditor}
+                        className="rounded-full border border-stone-300 px-5 py-3 text-sm font-semibold text-stone-700"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  </form>
+                ) : null}
               </DashboardPanel>
 
-              <DashboardPanel title={activeSection === 'news' ? 'News list' : activeSection === 'candidates' ? 'Candidate list' : 'Video list'}>
+              <DashboardPanel title={activeSection === 'mvnews' ? 'MV News list' : activeSection === 'candidates' ? 'Candidate list' : activeSection === 'videos' ? 'Video list' : 'News list'}>
                 {activeSection === 'news' ? (
                   <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-stone-200 pb-4">
@@ -1046,51 +1276,105 @@ export default function AdminDashboard() {
                   ) : (
                     <EmptyState title="No candidates" body="Add the first candidate profile using the form above." />
                   )
-                ) : videosResponse.isLoading ? (
-                  <PageLoader />
-                ) : videosResponse.isError ? (
-                  <ErrorState message="Unable to load videos." />
-                ) : videosResponse.data?.items.length ? (
-                  <div className="space-y-4">
-                    {videosResponse.data.items.map((item) => (
-                      <div
-                        key={item._id}
-                        className="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-white p-5 xl:flex-row xl:items-center xl:justify-between"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <h3 className="font-display text-2xl font-black text-stone-900">{item.title}</h3>
-                            <VideoBadge />
+                ) : activeSection === 'videos' ? (
+                  videosResponse.isLoading ? (
+                    <PageLoader />
+                  ) : videosResponse.isError ? (
+                    <ErrorState message="Unable to load videos." />
+                  ) : videosResponse.data?.items.length ? (
+                    <div className="space-y-4">
+                      {videosResponse.data.items.map((item) => (
+                        <div
+                          key={item._id}
+                          className="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-white p-5 xl:flex-row xl:items-center xl:justify-between"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <h3 className="font-display text-2xl font-black text-stone-900">{item.title}</h3>
+                              <VideoBadge />
+                            </div>
+                            <p className="text-sm text-stone-600">{formatDate(item.publishedAt)}</p>
                           </div>
-                          <p className="text-sm text-stone-600">{formatDate(item.publishedAt)}</p>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => startEditVideo(item)}
+                              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteVideo(item._id)}
+                              className="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={() => startEditVideo(item)}
-                            className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDeleteVideo(item._id)}
-                            className="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white"
-                          >
-                            {t('common.delete')}
-                          </button>
+                      ))}
+                      <PaginationControls 
+                        currentPage={videosResponse.data.pagination.page} 
+                        totalPages={videosResponse.data.pagination.totalPages} 
+                        onPageChange={setVideoPage} 
+                      />
+                    </div>
+                  ) : (
+                    <EmptyState title="No videos" body="Add a YouTube ID using the form above." />
+                  )
+                ) : activeSection === 'mvnews' ? (
+                  mvNewsResponse.isLoading ? (
+                    <PageLoader />
+                  ) : mvNewsResponse.isError ? (
+                    <ErrorState message="Unable to load MV news." />
+                  ) : mvNewsResponse.data?.items.length ? (
+                    <div className="space-y-4">
+                      {mvNewsResponse.data.items.map((item) => (
+                        <div
+                          key={item._id}
+                          className="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-white p-5 xl:flex-row xl:items-center xl:justify-between"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <h3 className="font-display text-2xl font-black text-stone-900">{item.title}</h3>
+                              {item.isFeatured ? (
+                                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-red-700">
+                                  Featured
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              {item.category} · {formatDate(item.publishedAt)}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => startEditMvNews(item)}
+                              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteMvNews(item._id)}
+                              className="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    <PaginationControls 
-                      currentPage={videosResponse.data.pagination.page} 
-                      totalPages={videosResponse.data.pagination.totalPages} 
-                      onPageChange={setVideoPage} 
-                    />
-                  </div>
-                ) : (
-                  <EmptyState title="No videos" body="Add a YouTube ID using the form above." />
-                )}
+                      ))}
+                      <PaginationControls 
+                        currentPage={mvNewsResponse.data.pagination.page} 
+                        totalPages={mvNewsResponse.data.pagination.totalPages} 
+                        onPageChange={setMvNewsPage} 
+                      />
+                    </div>
+                  ) : (
+                    <EmptyState title="No MV News" body="Create the first MV News item using the form above." />
+                  )
+                ) : null}
               </DashboardPanel>
             </div>
           </div>

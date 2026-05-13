@@ -16,7 +16,7 @@ import { useGetCandidatesQuery } from '../services/candidateApi';
 import { useGetNewsQuery } from '../services/newsApi';
 import type { NewsCategory } from '../types';
 
-const validCategories: NewsCategory[] = ['india', 'tamilnadu', 'candidate'];
+const validCategories: NewsCategory[] = ['india', 'tamilnadu', 'candidate', 'mvnews'];
 
 export default function CategoryPage() {
   const { t } = useTranslation();
@@ -40,7 +40,7 @@ export default function CategoryPage() {
   if (!category) {
     return (
       <div className={`${pageShell} py-14`}>
-        <EmptyState title="Unknown category" body="Use one of the supported categories: India, Tamil Nadu, or Candidate." />
+        <EmptyState title="Unknown category" body="Use one of the supported categories: India, Tamil Nadu, Candidate, or MV News." />
       </div>
     );
   }

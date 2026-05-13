@@ -1,4 +1,4 @@
-export type NewsCategory = 'india' | 'tamilnadu' | 'candidate';
+export type NewsCategory = 'india' | 'tamilnadu' | 'candidate' | 'mvnews';
 export type LanguageCode = 'en' | 'ta';
 export type AdminRole = 'admin' | 'editor';
 

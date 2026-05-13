@@ -21,6 +21,7 @@ export const categoryOptions: Array<{ value: NewsCategory; labelKey: string }> =
   { value: 'india', labelKey: 'categories.india' },
   { value: 'tamilnadu', labelKey: 'categories.tamilnadu' },
   { value: 'candidate', labelKey: 'categories.candidate' },
+  { value: 'mvnews', labelKey: 'categories.mvnews' },
 ];
 
 export const homeCategoryTabs: Array<{ value: 'all' | NewsCategory; labelKey: string }> = [

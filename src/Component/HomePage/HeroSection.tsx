@@ -4,32 +4,26 @@ import { formatDistanceToNow } from 'date-fns';
 import { stripHtml } from '../../lib/utils';
 
 export function HeroSection() {
-  const { data: featuredData, isLoading: featuredLoading } = useGetNewsQuery({ isFeatured: true, category: 'tamilnadu', limit: 1 });
-  const { data: allNewsData, isLoading: allNewsLoading } = useGetNewsQuery({ category: 'tamilnadu', limit: 10, page: 1 });
-  const { data: generalNewsData, isLoading: generalNewsLoading } = useGetNewsQuery({ limit: 15, page: 1 }); // Fallback for Latest Updates
+  const { data: mvFeaturedData, isLoading: mvFeaturedLoading } = useGetNewsQuery({ isFeatured: true, category: 'mvnews', limit: 1 });
+  const { data: mvLatestData, isLoading: mvLatestLoading } = useGetNewsQuery({ category: 'mvnews', limit: 10, page: 1 });
+  const { data: allNewsData, isLoading: allNewsLoading } = useGetNewsQuery({ category: 'tamilnadu', limit: 5, page: 1 });
 
-  if (featuredLoading || allNewsLoading || generalNewsLoading) {
+  if (mvFeaturedLoading || mvLatestLoading || allNewsLoading) {
     return <div className="h-[400px] flex items-center justify-center font-ui text-mv-gray-500">Loading Latest News...</div>;
   }
 
+  const mvFeaturedItems = mvFeaturedData?.items || [];
+  const mvLatestItems = mvLatestData?.items || [];
   const allNewsItems = allNewsData?.items || [];
-  const generalNewsItems = generalNewsData?.items || [];
   
-  // Fallback to the first news item if no explicitly featured story exists
-  const featuredStory = featuredData?.items?.[0] || allNewsItems[0] || generalNewsItems[0];
+  // Featured Story: exclusively MV news featured, fallback to MV news latest
+  const featuredStory = mvFeaturedItems[0] || mvLatestItems[0] || allNewsItems[0];
   
-  // Exclude the featured story from the lists if it came from allNewsItems
-  const remainingNews = featuredData?.items?.[0] ? allNewsItems : allNewsItems.slice(1);
-
-  const topNews = remainingNews.slice(0, 4);
+  // Left Column (Top News): remains standard news
+  const topNews = allNewsItems.filter(n => n._id !== featuredStory?._id).slice(0, 4);
   
-  // For Latest Updates, if we don't have enough Tamil Nadu news, fallback to general news
-  let latestNews = remainingNews.slice(4, 9);
-  if (latestNews.length === 0) {
-     // Filter out stories already shown in Top News and Featured
-     const shownIds = new Set([featuredStory?._id, ...topNews.map(n => n._id)]);
-     latestNews = generalNewsItems.filter(n => !shownIds.has(n._id)).slice(0, 5);
-  }
+  // Right Column (Latest Updates): show only MV Latest updated news
+  const latestNews = mvLatestItems.filter(n => n._id !== featuredStory?._id).slice(0, 5);
 
   if (!featuredStory) {
     return null;
@@ -81,7 +75,7 @@ export function HeroSection() {
 
       {/* Right Column: Latest Updates */}
       <aside className="flex flex-col gap-5 lg:border-l border-mv-border lg:pl-6 mt-6 lg:mt-0">
-        <h2 className="font-ui text-[14px] font-bold text-mv-red uppercase tracking-widest border-b-2 border-mv-black inline-block pb-1 mb-2">Latest Updates</h2>
+        <h2 className="font-ui text-[14px] font-bold text-mv-red uppercase tracking-widest border-b-2 border-mv-black inline-block pb-1 mb-2">MV News Latest Updates</h2>
         {latestNews.map((story, idx) => (
           <Link key={story._id} to={`/news/${story.slug}`} className={`group block flex gap-3 ${idx !== latestNews.length - 1 ? 'border-b border-mv-gray-100 pb-4' : ''}`}>
              <div className="w-[80px] h-[60px] rounded overflow-hidden shrink-0">
