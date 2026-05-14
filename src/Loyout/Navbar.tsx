@@ -48,8 +48,8 @@ export function Navbar() {
     },
     { name: "Tamil Nadu", path: "/category/tamilnadu" },
     { name: "India", path: "/category/india" },
-    { name: "Candidates", path: "/candidates" },
-    { name: "Videos", path: "/videos" },
+    { name: "MV Candidates News Hub", path: "/candidates" },
+    { name: "MV News Videos", path: "/videos" },
   ];
 
   return (
@@ -63,7 +63,7 @@ export function Navbar() {
               <img
                 src={mvnewsin}
                 alt="MV News"
-                className="h-14 sm:h-16 md:h-20 lg:h-34 w-auto object-contain"
+                className="h-18 sm:h-18 md:h-20 lg:h-34 w-auto object-contain"
               />
             </Link>
           </div>
@@ -100,7 +100,7 @@ export function Navbar() {
             <img
               src={mvgifbot}
               alt="MV News Bot"
-              className="h-16 sm:h-20 md:h-24 lg:h-28 xl:h-32 w-auto object-contain"
+              className="h-16 sm:h-20 md:h-24 lg:h-30 xl:h-35 w-auto object-contain"
             />
           </div>
         </div>

@@ -1,6 +1,8 @@
 export type NewsCategory = 'india' | 'tamilnadu' | 'candidate' | 'mvnews';
 export type LanguageCode = 'en' | 'ta';
 export type AdminRole = 'admin' | 'editor';
+export type VideoSourceType = 'manual' | 'channel';
+export type VideoSourceFilter = 'all' | 'manual' | 'channel';
 
 export interface Pagination {
   total: number;
@@ -79,6 +81,7 @@ export interface Video {
   publishedAt: string;
   tags: string[];
   isFeatureInterview: boolean;
+  sourceType: VideoSourceType;
   createdAt: string;
   updatedAt: string;
 }

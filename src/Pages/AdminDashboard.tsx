@@ -225,7 +225,7 @@ export default function AdminDashboard() {
     category: 'mvnews',
   });
   const candidateResponse = useGetCandidatesQuery();
-  const videosResponse = useGetVideosQuery({ page: videoPage, limit: 10 });
+  const videosResponse = useGetVideosQuery({ page: videoPage, limit: 10, source: 'manual' });
 
   const [createNews, createNewsStatus] = useCreateNewsMutation();
   const [updateNews, updateNewsStatus] = useUpdateNewsMutation();
@@ -950,13 +950,18 @@ export default function AdminDashboard() {
                   </form>
                 ) : activeSection === 'videos' ? (
                   <form className="grid gap-5" onSubmit={handleVideoSubmit}>
+                    <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-stone-700">
+                      Latest videos from the MVNewsBot YouTube channel appear on the website automatically.
+                      Use this form only for backup or alternative YouTube news videos that should also appear in the featured video section.
+                    </div>
                     <div className="grid gap-5 md:grid-cols-2">
                       <label className="space-y-2">
-                        <span className="text-sm font-semibold text-stone-700">YouTube ID</span>
+                        <span className="text-sm font-semibold text-stone-700">YouTube video URL or ID</span>
                         <input
                           value={videoForm.youtubeId}
                           onChange={(event) => setVideoForm((current) => ({ ...current, youtubeId: event.target.value }))}
                           required
+                          placeholder="https://www.youtube.com/watch?v=... or the 11-character ID"
                           className="w-full rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm"
                         />
                       </label>
@@ -1320,7 +1325,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                   ) : (
-                    <EmptyState title="No videos" body="Add a YouTube ID using the form above." />
+                    <EmptyState title="No backup videos" body="Add an alternative YouTube news video using the form above." />
                   )
                 ) : activeSection === 'mvnews' ? (
                   mvNewsResponse.isLoading ? (

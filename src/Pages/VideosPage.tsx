@@ -40,6 +40,9 @@ export default function VideosPage() {
                         {new Date(video.publishedAt).toLocaleDateString()}
                       </p>
                     </div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
+                      {video.sourceType === 'channel' ? 'MVNewsBot channel' : 'Admin backup video'}
+                    </p>
                     <h2 className="font-display text-2xl font-black text-stone-900">{video.title}</h2>
                     <p className="text-sm leading-6 text-stone-600">{video.description || 'Watch the full report on YouTube.'}</p>
                     {video.tags.length ? (
@@ -55,7 +58,7 @@ export default function VideosPage() {
             <Pagination pagination={videoResponse.data.pagination} onChange={setPage} />
           </>
         ) : (
-          <EmptyState title="No videos yet" body="Add YouTube IDs from the admin dashboard to populate this page." />
+          <EmptyState title="No videos yet" body="Latest MVNewsBot uploads and admin backup videos will show up here when available." />
         )}
       </section>
     </>

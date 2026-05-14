@@ -75,7 +75,7 @@ export function HeroSection() {
 
       {/* Right Column: Latest Updates */}
       <aside className="flex flex-col gap-5 lg:border-l border-mv-border lg:pl-6 mt-6 lg:mt-0">
-        <h2 className="font-ui text-[14px] font-bold text-mv-red uppercase tracking-widest border-b-2 border-mv-black inline-block pb-1 mb-2">MV News Latest Updates</h2>
+        <h2 className="font-ui text-[14px] font-bold text-mv-red uppercase tracking-widest border-b-2 border-mv-black inline-block pb-1 mb-2">MV Candidate News Hub</h2>
         {latestNews.map((story, idx) => (
           <Link key={story._id} to={`/news/${story.slug}`} className={`group block flex gap-3 ${idx !== latestNews.length - 1 ? 'border-b border-mv-gray-100 pb-4' : ''}`}>
              <div className="w-[80px] h-[60px] rounded overflow-hidden shrink-0">

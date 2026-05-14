@@ -1,14 +1,20 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../app/axiosBaseQuery';
 import { defaultPagination } from '../lib/utils';
-import type { ApiResponse, PaginatedResult, Video, VideoInput } from '../types';
+import type { ApiResponse, PaginatedResult, Video, VideoInput, VideoSourceFilter } from '../types';
+
+interface VideoQueryParams {
+  page?: number;
+  limit?: number;
+  source?: VideoSourceFilter;
+}
 
 export const videoApi = createApi({
   reducerPath: 'videoApi',
   baseQuery: axiosBaseQuery(),
   tagTypes: ['Video'],
   endpoints: (builder) => ({
-    getVideos: builder.query<PaginatedResult<Video>, { page?: number; limit?: number } | void>({
+    getVideos: builder.query<PaginatedResult<Video>, VideoQueryParams | void>({
       query: (params) => ({
         url: '/videos',
         method: 'GET',
