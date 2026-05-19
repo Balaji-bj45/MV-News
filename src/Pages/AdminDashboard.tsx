@@ -50,7 +50,9 @@ import type {
   VideoInput,
 } from '../types';
 
-type DashboardSection = 'news' | 'candidates' | 'videos' | 'mvnews';
+import AdsManager from './Admin/AdsManager';
+
+type DashboardSection = 'news' | 'candidates' | 'videos' | 'mvnews' | 'ads';
 
 interface NewsEditorState extends Omit<NewsInput, 'tags'> {
   tagsText: string;
@@ -207,7 +209,7 @@ export default function AdminDashboard() {
 
   const sectionParam = searchParams.get('section');
   const activeSection: DashboardSection =
-    sectionParam === 'candidates' || sectionParam === 'videos' || sectionParam === 'mvnews' ? sectionParam : 'news';
+    sectionParam === 'candidates' || sectionParam === 'videos' || sectionParam === 'mvnews' || sectionParam === 'ads' ? sectionParam : 'news';
 
   const [newsPage, setNewsPage] = useState(1);
   const [mvNewsPage, setMvNewsPage] = useState(1);
@@ -561,11 +563,21 @@ export default function AdminDashboard() {
                 active={activeSection === 'mvnews'}
                 onClick={() => setSection('mvnews')}
               />
+              <SidebarButton
+                label="Ads & Banners"
+                icon={<ImagePlus className="h-5 w-5" />}
+                active={activeSection === 'ads'}
+                onClick={() => setSection('ads')}
+              />
             </aside>
 
             <div className="space-y-6">
-              <DashboardPanel title={activeSection === 'mvnews' ? 'Add or edit MV News' : activeSection === 'candidates' ? 'Add or edit candidate' : activeSection === 'videos' ? 'Add or edit video' : 'Add or edit news'} subtitle={t('admin.imageHint')}>
-                {activeSection === 'news' ? (
+              {activeSection === 'ads' ? (
+                <AdsManager />
+              ) : (
+                <>
+                  <DashboardPanel title={activeSection === 'mvnews' ? 'Add or edit MV News' : activeSection === 'candidates' ? 'Add or edit candidate' : activeSection === 'videos' ? 'Add or edit video' : 'Add or edit news'} subtitle={t('admin.imageHint')}>
+                    {activeSection === 'news' ? (
                   <form className="grid gap-5" onSubmit={handleNewsSubmit}>
                     <div className="grid gap-5 md:grid-cols-2">
                       <label className="space-y-2">
@@ -1381,6 +1393,8 @@ export default function AdminDashboard() {
                   )
                 ) : null}
               </DashboardPanel>
+                </>
+              )}
             </div>
           </div>
         </div>

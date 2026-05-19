@@ -1,11 +1,46 @@
 import { useGetNewsQuery } from "../../services/newsApi";
 import { useGetVideosQuery } from "../../services/videoApi";
+import { useGetAdvertisementsQuery } from "../../services/advertisementApi";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { getEmbeddedYoutubeUrl, stripHtml } from "../../lib/utils";
 import { useEffect, useState } from "react";
 
 const topics = ["#Elections2026", "#TamilNadu", "#IndiaEconomy", "#IPL2026", "#ISRO", "#AIPolicy", "#ChennaiMetro", "#Budget2026"];
+
+function SidebarAdBanner() {
+  const { data: ads, isLoading } = useGetAdvertisementsQuery('sidebar_banner');
+  const ad = ads?.[0];
+
+  if (isLoading) {
+    return (
+      <div className="w-full bg-mv-gray-100 rounded h-[250px] animate-pulse flex items-center justify-center text-mv-gray-400 text-[11px] font-semibold tracking-wide uppercase">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!ad || !ad.isActive || !ad.imageUrl) {
+    return (
+      <div className="w-full bg-white border border-dashed border-mv-gray-300 rounded h-[250px] flex flex-col items-center justify-center text-mv-gray-500 text-[11px] font-semibold tracking-wide uppercase gap-2">
+        Advertisement Space
+        <span className="text-[10px] opacity-70">Recommended: 300 x 250</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-auto flex justify-center">
+      {ad.targetUrl ? (
+        <a href={ad.targetUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+          <img src={ad.imageUrl} alt="Advertisement" className="w-full h-auto max-h-[400px] object-contain rounded" />
+        </a>
+      ) : (
+        <img src={ad.imageUrl} alt="Advertisement" className="w-full h-auto max-h-[400px] object-contain rounded" />
+      )}
+    </div>
+  );
+}
 
 export function ContentSection() {
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
@@ -284,25 +319,9 @@ export function ContentSection() {
       <aside className="w-full">
         <div className="lg:sticky lg:top-[80px] flex flex-col gap-6">
 
-          {/* Ad Placeholder */}
-          <div className="w-full bg-white border border-dashed border-mv-gray-300 rounded h-[250px] flex flex-col items-center justify-center text-mv-gray-500 text-[11px] font-semibold tracking-wide uppercase gap-2">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="opacity-30"
-            >
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="m8 21 4-4 4 4" />
-              <path d="M12 17v4" />
-            </svg>
-            <span>Advertisement</span>
-            <span className="text-[10px] text-mv-gray-400">300 x 250</span>
-          </div>
-
+          {/* Ad Placeholder / Sidebar Banner */}
+          <SidebarAdBanner />
+          
           {/* Trending Now */}
           <div className="w-full bg-white border border-mv-border shadow-sm">
             <div className="bg-mv-black text-white px-4 py-3 text-[12px] font-bold tracking-widest uppercase flex items-center justify-between">

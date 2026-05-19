@@ -5,6 +5,7 @@ import { authApi } from '../services/authApi';
 import { newsApi } from '../services/newsApi';
 import { candidateApi } from '../services/candidateApi';
 import { videoApi } from '../services/videoApi';
+import { advertisementApi } from '../services/advertisementApi';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     [newsApi.reducerPath]: newsApi.reducer,
     [candidateApi.reducerPath]: candidateApi.reducer,
     [videoApi.reducerPath]: videoApi.reducer,
+    [advertisementApi.reducerPath]: advertisementApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -20,6 +22,7 @@ export const store = configureStore({
       newsApi.middleware,
       candidateApi.middleware,
       videoApi.middleware,
+      advertisementApi.middleware,
     ),
 });
 

@@ -43,8 +43,8 @@ export default function VideosPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
                       {video.sourceType === 'channel' ? 'MVNewsBot channel' : 'Admin backup video'}
                     </p>
-                    <h2 className="font-display text-2xl font-black text-stone-900">{video.title}</h2>
-                    <p className="text-sm leading-6 text-stone-600">{video.description || 'Watch the full report on YouTube.'}</p>
+                    <h2 className="font-display text-2xl font-black text-stone-900 line-clamp-2" title={video.title}>{video.title}</h2>
+                    <p className="text-sm leading-6 text-stone-600 line-clamp-2" title={video.description}>{video.description || 'Watch the full report on YouTube.'}</p>
                     {video.tags.length ? (
                       <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-700">
                         <PlayCircle className="h-3.5 w-3.5" />

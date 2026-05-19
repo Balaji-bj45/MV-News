@@ -1,6 +1,6 @@
 export function NewsletterSection() {
   return (
-    <div className="bg-red-800/100 text-white px-6 py-10 md:py-12 rounded-lg text-center mb-10 overflow-hidden relative shadow-xl">
+    <div className="bg-gray-600 text-white px-6 py-10 md:py-12 rounded-lg text-center mb-10 overflow-hidden relative shadow-xl">
       <div className="relative z-10">
         <h2 className="font-display text-[24px] md:text-[28px] font-black tracking-tight mb-3">Stay Ahead of the Curve</h2>
         <p className="font-serif text-[14px] md:text-[15px] text-mv-gray-300 mb-6 max-w-[500px] mx-auto">Get exclusive political insights, breaking news, and deep analysis delivered straight to your inbox daily.</p>
