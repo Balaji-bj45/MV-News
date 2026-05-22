@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Upload, ImageIcon, Link as LinkIcon } from 'lucide-react';
-import { useGetAdvertisementsQuery, useUpdateAdvertisementMutation } from '../../services/advertisementApi';
+import {
+  useGetAdvertisementsQuery,
+  useUpdateAdvertisementMutation,
+  type Advertisement,
+} from '../../services/advertisementApi';
 import { uploadImage } from '../../services/upload';
 import { Seo, PageLoader } from '../../components/ui';
 
 export default function AdsManager() {
-  const { t } = useTranslation();
   const { data: ads, isLoading } = useGetAdvertisementsQuery();
-  const [updateAd, { isLoading: isUpdating }] = useUpdateAdvertisementMutation();
+  const [updateAd] = useUpdateAdvertisementMutation();
 
   const [uploading, setUploading] = useState<{ [key: string]: boolean }>({});
 
@@ -19,8 +21,8 @@ export default function AdsManager() {
 
     setUploading({ ...uploading, [position]: true });
     try {
-      const url = await uploadImage(file);
-      await updateAd({ position, payload: { imageUrl: url, isActive: true } }).unwrap();
+      const uploadResult = await uploadImage(file);
+      await updateAd({ position, payload: { imageUrl: uploadResult.imageUrl, isActive: true } }).unwrap();
       toast.success('Ad banner updated successfully');
     } catch (error: any) {
       toast.error(error.message || 'Failed to upload image');
@@ -40,11 +42,14 @@ export default function AdsManager() {
 
   if (isLoading) return <PageLoader />;
 
-  const getAd = (position: string) => ads?.find((ad) => ad.position === position);
+  const getAd = (position: Advertisement['position']) => ads?.find((ad) => ad.position === position);
 
   return (
     <>
-      <Seo title="Manage Advertisements | Admin" />
+      <Seo
+        title="Manage Advertisements | Admin"
+        description="Upload and manage advertisement banners shown across the MV News experience."
+      />
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Manage Advertisements</h1>
@@ -56,7 +61,6 @@ export default function AdsManager() {
             title="Top Banner Ad"
             description="Displayed on the home page above the main content."
             recommendedSize="Recommended size: 1200 x 200 pixels"
-            position="top_banner"
             ad={getAd('top_banner')}
             onUpload={(e) => handleImageUpload(e, 'top_banner')}
             onUrlUpdate={(url) => handleUrlUpdate('top_banner', url)}
@@ -67,7 +71,6 @@ export default function AdsManager() {
             title="Sidebar Banner Ad"
             description="Displayed on the right sidebar of the home page."
             recommendedSize="Recommended size: 300 x 250 pixels"
-            position="sidebar_banner"
             ad={getAd('sidebar_banner')}
             onUpload={(e) => handleImageUpload(e, 'sidebar_banner')}
             onUrlUpdate={(url) => handleUrlUpdate('sidebar_banner', url)}
@@ -83,7 +86,6 @@ function AdCard({
   title,
   description,
   recommendedSize,
-  position,
   ad,
   onUpload,
   onUrlUpdate,
@@ -92,8 +94,7 @@ function AdCard({
   title: string;
   description: string;
   recommendedSize: string;
-  position: string;
-  ad: any;
+  ad?: Advertisement;
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onUrlUpdate: (url: string) => void;
   isUploading: boolean;

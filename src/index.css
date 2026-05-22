@@ -26,6 +26,7 @@ body {
   background: white;
   color: var(--color-mv-ink);
   overflow-x: hidden;
+
 }
 
 #root {
