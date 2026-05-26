@@ -10,7 +10,7 @@ const topics = ["#Elections2026", "#TamilNadu", "#IndiaEconomy", "#IPL2026", "#I
 
 function SidebarAdBanner() {
   const { data: ads, isLoading } = useGetAdvertisementsQuery('sidebar_banner');
-  const ad = ads?.[0];
+  const ad = ads?.find((item) => item.isActive && item.imageUrl);
 
   if (isLoading) {
     return (
@@ -20,7 +20,7 @@ function SidebarAdBanner() {
     );
   }
 
-  if (!ad || !ad.isActive || !ad.imageUrl) {
+  if (!ad) {
     return (
       <div className="w-full bg-white border border-dashed border-mv-gray-300 rounded h-[250px] flex flex-col items-center justify-center text-mv-gray-500 text-[11px] font-semibold tracking-wide uppercase gap-2">
         Advertisement Space
@@ -30,13 +30,13 @@ function SidebarAdBanner() {
   }
 
   return (
-    <div className="w-full h-auto flex justify-center">
+    <div className="w-full h-[250px] overflow-hidden rounded flex justify-center bg-mv-gray-100">
       {ad.targetUrl ? (
         <a href={ad.targetUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
-          <img src={ad.imageUrl} alt="Advertisement" className="w-full h-auto max-h-[400px] object-contain rounded" />
+          <img src={ad.imageUrl} alt="Advertisement" className="w-full h-full object-cover rounded" />
         </a>
       ) : (
-        <img src={ad.imageUrl} alt="Advertisement" className="w-full h-auto max-h-[400px] object-contain rounded" />
+        <img src={ad.imageUrl} alt="Advertisement" className="w-full h-full object-cover rounded" />
       )}
     </div>
   );
