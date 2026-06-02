@@ -935,17 +935,31 @@ export default function AdminDashboard() {
                       ))}
                     </div>
 
-                    <label className="flex items-center gap-3 text-sm font-semibold text-stone-700">
-                      <input
-                        type="checkbox"
-                        checked={candidateForm.isActive}
-                        onChange={(event) =>
-                          setCandidateForm((current) => ({ ...current, isActive: event.target.checked }))
-                        }
-                        className="h-4 w-4 rounded border-stone-300"
-                      />
-                      Active candidate
-                    </label>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <label className="flex items-center gap-3 text-sm font-semibold text-stone-700">
+                        <input
+                          type="checkbox"
+                          checked={candidateForm.isActive}
+                          onChange={(event) =>
+                            setCandidateForm((current) => ({ ...current, isActive: event.target.checked }))
+                          }
+                          className="h-4 w-4 rounded border-stone-300"
+                        />
+                        Active candidate
+                      </label>
+
+                      <label className="flex items-center gap-3 text-sm font-semibold text-stone-700">
+                        <input
+                          type="checkbox"
+                          checked={candidateForm.isMainCandidate || false}
+                          onChange={(event) =>
+                            setCandidateForm((current) => ({ ...current, isMainCandidate: event.target.checked }))
+                          }
+                          className="h-4 w-4 rounded border-stone-300"
+                        />
+                        Featured Main Candidate (Displays in Hero Section middle column)
+                      </label>
+                    </div>
 
                     <div className="flex flex-wrap gap-3">
                       <button type="submit" className="rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700">
@@ -1266,7 +1280,14 @@ export default function AdminDashboard() {
                           className="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-white p-5 xl:flex-row xl:items-center xl:justify-between"
                         >
                           <div>
-                            <h3 className="font-display text-2xl font-black text-stone-900">{item.name}</h3>
+                            <div className="flex flex-wrap items-center gap-3">
+                              <h3 className="font-display text-2xl font-black text-stone-900">{item.name}</h3>
+                              {item.isMainCandidate ? (
+                                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-red-700">
+                                  Main Candidate
+                                </span>
+                              ) : null}
+                            </div>
                             <p className="text-sm text-stone-600">
                               {item.party} · {item.constituency}
                             </p>

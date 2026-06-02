@@ -132,6 +132,7 @@ export const createEmptyCandidateForm = (): CandidateInput => ({
   timeline: [createEmptyTimelineEvent()],
   socialLinks: {},
   isActive: true,
+  isMainCandidate: false,
 });
 
 export const createEmptyVideoForm = (): VideoInput => ({
@@ -184,6 +185,7 @@ export const toCandidateForm = (candidate: Candidate): CandidateInput => ({
     : [createEmptyTimelineEvent()],
   socialLinks: candidate.socialLinks ?? {},
   isActive: candidate.isActive,
+  isMainCandidate: candidate.isMainCandidate ?? false,
 });
 
 export const toVideoForm = (video: {

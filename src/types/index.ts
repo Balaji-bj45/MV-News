@@ -68,6 +68,7 @@ export interface Candidate {
   timeline: CandidateTimelineEvent[];
   socialLinks: CandidateSocialLinks;
   isActive: boolean;
+  isMainCandidate?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -145,6 +146,7 @@ export interface CandidateInput {
   timeline: CandidateTimelineEvent[];
   socialLinks: CandidateSocialLinks;
   isActive: boolean;
+  isMainCandidate?: boolean;
 }
 
 export interface VideoInput {
